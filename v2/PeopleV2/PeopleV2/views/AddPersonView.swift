@@ -13,7 +13,7 @@ struct AddPersonView: View {
     @State private var surname = ""
     @State private var phone = ""
     
-    // output
+    // "interface" - output callback
     var onSuccess: (Person) -> Void
     
     // PropertyWrapper to close the window

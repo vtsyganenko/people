@@ -10,9 +10,11 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var data: [Person] = []
+    @State private var selectedPerson: Person?
     
     // flag for switching screens
     @State private var showAddPersonView = false
+    @State private var showPersonView = false
     
     var body: some View {
         NavigationStack {
@@ -53,6 +55,11 @@ struct ContentView: View {
                         data.append(newPerson)
                     }
                 })
+                .sheet(item: $selectedPerson) { person in
+                    if let index = data.firstIndex(where: { $0.id == person.id}) {
+                        PersonView(person: $data[index])
+                    }
+                }
         }
     }
     
@@ -64,6 +71,9 @@ struct ContentView: View {
             List {
                 ForEach(data) { person in
                     Text(person.fullName)
+                        .onTapGesture {
+                            selectedPerson = person
+                        }
                 }
             }
             .listStyle(.plain)
