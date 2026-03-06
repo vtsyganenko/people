@@ -11,7 +11,7 @@ import SwiftUI
 struct PeopleV2App: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
         }
     }
 }
