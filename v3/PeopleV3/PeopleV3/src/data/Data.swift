@@ -6,15 +6,21 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Person: Identifiable {
-    let id = UUID()
-    
+@Model
+final class Person {
     var name: String
     var surname: String
     var phone: String
     
     var fullName: String {
         get { name + " " + surname }
+    }
+    
+    init(name: String, surname: String, phone: String) {
+        self.name = name
+        self.surname = surname
+        self.phone = phone
     }
 }

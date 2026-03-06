@@ -6,13 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainView: View {
     
-    @State private var data: [Person] = []
+    // SwiftData context
+    @Environment(\.modelContext) private var modelContext
+    
+    // list received by query
+    @Query(sort: \Person.name) private var persons: [Person]
+    
     @State private var selectedPerson: Person?
     
-    // flag for switching screens
+    // flags for switching screens
     @State private var showAddPersonView = false
     @State private var showPersonView = false
     
@@ -52,25 +58,29 @@ struct MainView: View {
                 }
                 .sheet(isPresented: $showAddPersonView, content: {
                     AddPersonView { newPerson in
-                        data.append(newPerson)
+                        // save to SwiftData
+                        modelContext.insert(newPerson)
                     }
                 })
                 .sheet(item: $selectedPerson) { person in
-                    if let index = data.firstIndex(where: { $0.id == person.id}) {
-                        PersonView(person: $data[index])
-                    }
+                    // just pass object to @Bindable
+                    PersonView(person: person)
                 }
         }
     }
     
     @ViewBuilder
     private var ListView: some View {
-        if data.isEmpty {
+        if persons.isEmpty {
             Text("List will be here...")
         } else {
             List {
-                ForEach(data) { person in
+                ForEach(persons) { person in
                     Text(person.fullName)
+                        // use whole width
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        // make whole area clickable
+                        .contentShape(Rectangle())
                         .onTapGesture {
                             selectedPerson = person
                         }
@@ -85,10 +95,14 @@ struct MainView: View {
     }
     
     func clearAll() {
-        data.removeAll()
+        for person in persons {
+            modelContext.delete(person)
+        }
     }
 }
 
 #Preview {
     MainView()
+        // Preview can use SwiftData, but all data will be stored in RAM only
+        .modelContainer(for: Person.self, inMemory: true)
 }

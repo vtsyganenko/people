@@ -32,7 +32,8 @@ struct AddPersonView: View {
                 ToolbarItem(placement: .bottomBar) {
                     HStack {
                         Button("Save") {
-                            onSuccess(Person(name: name, surname: surname, phone: phone))
+                            let person = Person(name: name, surname: surname, phone: phone)
+                            onSuccess(person)
                             dismiss()
                         }
                         .font(.title)

@@ -10,7 +10,7 @@ import SwiftUI
 struct PersonView: View {
     
     // "interface"
-    @Binding var person: Person
+    @Bindable var person: Person
     
     // PropertyWrapper to close the window
     @Environment(\.dismiss) private var dismiss
@@ -59,7 +59,7 @@ struct PersonView: View {
         @State var person = Person(name: "John", surname: "Doe", phone: "123-456-789")
         
         var body: some View {
-            PersonView(person: $person)
+            PersonView(person: person)
         }
     }
     
