@@ -9,13 +9,63 @@ import SwiftUI
 
 struct PersonView: View {
     
-    // "interface"
+    // "interface" - Person object passed to view or edit
     @Bindable var person: Person
     
     // PropertyWrapper to close the window
     @Environment(\.dismiss) private var dismiss
     
+    // View/Edit mode flag
+    private enum Mode { case view, edit }
+    @State private var mode = Mode.view
+    
+    // Data variables for UI
+    @State private var name: String = ""
+    @State private var surname: String = ""
+    @State private var phone: String = ""
+    
     var body: some View {
+        NavigationStack {
+            PersonInfoView
+                .toolbar {
+                    if (mode == .view) {
+                        ToolbarItem(placement: .topBarTrailing, content: {
+                            Button {
+                                name = person.name
+                                surname = person.surname
+                                phone = person.phone
+                                mode = .edit
+                            } label: {
+                                Image(systemName: "pencil")
+                            }
+                        })
+                    }
+                    else {
+                        ToolbarItem(placement: .topBarLeading, content: {
+                            Button {
+                                mode = .view
+                            } label: {
+                                Image(systemName: "xmark")
+                            }
+                        })
+                        ToolbarItem(placement: .topBarTrailing, content: {
+                            Button {
+                                saveInput()
+                            } label: {
+                                Image(systemName: "checkmark")
+                            }
+                        })
+
+                    }
+                    ToolbarItem(placement: .bottomBar, content: {
+                        Button("Close") { dismiss() }
+                    })
+                }
+        }
+    }
+    
+    @ViewBuilder
+    private var PersonInfoView: some View {
         List {
             Section {
                 HStack {
@@ -34,22 +84,52 @@ struct PersonView: View {
                 .listRowBackground(Color.clear)
             }
             Section(header: Text("Main info")) {
-                LabeledContent("Name", value: person.name)
-                LabeledContent("Surname", value: person.surname)
-                HStack {
-                    Image(systemName: "phone.circle")
-                    Spacer()
-                    Text(person.phone)
+                LabeledContent {
+                    if (mode == .view) {
+                        Text(person.name)
+                    } else {
+                        TextField("Enter name", text: $name)
+                            .multilineTextAlignment(.trailing)
+                            .onSubmit { saveInput() }
+                    }
+                } label: {
+                    Text("Name")
                 }
+                
+                LabeledContent {
+                    if (mode == .view) {
+                        Text(person.surname)
+                    } else {
+                        TextField("Enter surname", text: $surname)
+                            .multilineTextAlignment(.trailing)
+                            .onSubmit { saveInput() }
+                    }
+                } label: {
+                    Text("Surname")
+                }
+                
+                LabeledContent {
+                    if (mode == .view) {
+                        Text(person.phone)
+                    } else {
+                        TextField("Enter name", text: $phone)
+                            .multilineTextAlignment(.trailing)
+                            .keyboardType(.phonePad)
+                            .onSubmit { saveInput() }
+                    }
+                } label: {
+                    Label("", systemImage: "phone")
+                }
+                
             }
         }
-        .navigationTitle("aaa")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .bottomBar, content: {
-                Button("Закрыть") { dismiss() }
-            })
-        }
+    }
+    
+    func saveInput() {
+        person.name = name
+        person.surname = surname
+        person.phone = phone
+        mode = .view
     }
     
 }
