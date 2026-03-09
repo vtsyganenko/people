@@ -41,7 +41,7 @@ struct MainView: View {
                             Button(action: {
                                 clearAll()
                             }, label: {
-                                Image(systemName: "pencil")
+                                Image(systemName: "trash")
                             })
                             .font(.title)
                             
@@ -72,7 +72,7 @@ struct MainView: View {
     @ViewBuilder
     private var ListView: some View {
         if persons.isEmpty {
-            Text("List will be here...")
+            Text("List of people will be here...").font(.title2)
         } else {
             List {
                 ForEach(persons) { person in
@@ -85,18 +85,27 @@ struct MainView: View {
                             selectedPerson = person
                         }
                 }
+                // delete line by swipe left (mark "Delete" is created automatically)
+                .onDelete(perform: deletePerson)
             }
             .listStyle(.plain)
         }
     }
     
-    func addElement() {
+    private func addElement() {
         showAddPersonView = true
     }
     
-    func clearAll() {
+    private func clearAll() {
         for person in persons {
             modelContext.delete(person)
+        }
+    }
+    
+    private func deletePerson(at offsets: IndexSet) {
+        for index in offsets {
+            let personToDelete = persons[index]
+            modelContext.delete(personToDelete)
         }
     }
 }
