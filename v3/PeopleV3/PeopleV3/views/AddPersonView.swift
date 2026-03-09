@@ -29,20 +29,20 @@ struct AddPersonView: View {
             }
             .navigationTitle("New Person")
             .toolbar {
-                ToolbarItem(placement: .bottomBar) {
-                    HStack {
-                        Button("Save") {
-                            let person = Person(name: name, surname: surname, phone: phone)
-                            onSuccess(person)
-                            dismiss()
-                        }
-                        .font(.title)
-                        .disabled(name.isEmpty && surname.isEmpty)
-                        Button("Cancel") {
-                            dismiss()
-                        }
-                        .font(.title)
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
                     }
+                    .font(.title2)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        let newPerson = Person(name: name, surname: surname, phone: phone)
+                        onSuccess(newPerson)
+                        dismiss()
+                    }
+                    .font(.title2)
+                    .disabled(name.isEmpty && surname.isEmpty)
                 }
             }
         }
@@ -50,5 +50,6 @@ struct AddPersonView: View {
 }
 
 #Preview {
+    // pass empty callback to Preview version
     AddPersonView() { person in }
 }
