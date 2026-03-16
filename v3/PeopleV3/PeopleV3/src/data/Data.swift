@@ -13,6 +13,7 @@ final class Person {
     var name: String
     var surname: String
     var phone: String
+    var birthDate: Date? = nil
     
     var fullName: String {
         get { name + " " + surname }

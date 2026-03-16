@@ -23,6 +23,16 @@ struct PersonView: View {
     @State private var name: String = ""
     @State private var surname: String = ""
     @State private var phone: String = ""
+    @State private var birthdate: Date = Date()
+    
+    init(person: Person) {
+        self.person = person
+        self._name = State(initialValue: person.name)
+        self._surname = State(initialValue: person.surname)
+        self._phone = State(initialValue: person.phone)
+        
+        self._birthdate = State(initialValue: person.birthDate ?? Date())
+    }
     
     var body: some View {
         NavigationStack {
@@ -121,6 +131,19 @@ struct PersonView: View {
                     Label("", systemImage: "phone")
                 }
                 
+                LabeledContent {
+                    if (mode == .view) {
+                        if let birthDate = person.birthDate {
+                            Text(birthDate, format: .dateTime.day().month().year())
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        DatePicker("", selection: $birthdate, in: ...Date(), displayedComponents: .date)
+                    }
+                } label: {
+                    Label("", systemImage: "birthday.cake")
+                }
+                
             }
         }
     }
@@ -129,6 +152,7 @@ struct PersonView: View {
         person.name = name
         person.surname = surname
         person.phone = phone
+        person.birthDate = birthdate
         mode = .view
     }
     
@@ -136,7 +160,17 @@ struct PersonView: View {
 
 #Preview {
     struct PreviewWrapper : View {
-        @State var person = Person(name: "John", surname: "Doe", phone: "123-456-789")
+        @State var person: Person
+        
+        init() {
+            person = Person(name: "John", surname: "Doe", phone: "123-456-789")
+            
+            var components = DateComponents()
+            components.year = 2005
+            components.month = 5
+            components.day = 20
+            person.birthDate = Calendar.current.date(from: components)
+        }
         
         var body: some View {
             PersonView(person: person)

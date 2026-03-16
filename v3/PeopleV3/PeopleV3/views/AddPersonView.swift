@@ -12,6 +12,8 @@ struct AddPersonView: View {
     @State private var name = ""
     @State private var surname = ""
     @State private var phone = ""
+    @State private var birthDate: Date = Date()
+    @State private var applyBirthDate = false
     
     // "interface" - output callback
     var onSuccess: (Person) -> Void
@@ -26,6 +28,26 @@ struct AddPersonView: View {
                 TextField("Surname", text: $surname)
                 TextField("Phone", text: $phone)
                     .keyboardType(.phonePad)
+                
+                if !applyBirthDate {
+                    Text("Birthday")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .foregroundStyle(.tertiary)
+                        .onTapGesture {
+                            applyBirthDate = true
+                        }
+                } else {
+                    HStack {
+                        DatePicker("Birthdate", selection: $birthDate, in: ...Date(), displayedComponents: .date)
+                        Image(systemName: "trash")
+                            .font(.title)
+                            .foregroundStyle(Color.black)
+                            .onTapGesture {
+                                applyBirthDate = false
+                            }
+                    }
+                }
             }
             .navigationTitle("New Person")
             .toolbar {
@@ -38,6 +60,7 @@ struct AddPersonView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         let newPerson = Person(name: name, surname: surname, phone: phone)
+                        if (applyBirthDate) { newPerson.birthDate = birthDate }
                         onSuccess(newPerson)
                         dismiss()
                     }
