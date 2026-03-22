@@ -14,6 +14,7 @@ final class Person {
     var surname: String
     var phone: String
     var birthDate: Date? = nil
+    var photoData: Data? = nil
     
     var fullName: String {
         get { name + " " + surname }

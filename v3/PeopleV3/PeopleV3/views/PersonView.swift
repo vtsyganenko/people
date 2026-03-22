@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct PersonView: View {
     
@@ -24,6 +25,9 @@ struct PersonView: View {
     @State private var surname: String = ""
     @State private var phone: String = ""
     @State private var birthdate: Date = Date()
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
+    @State private var selectedPhotoData: Data? = nil
+    @State private var selectedPhotoImage: UIImage? = nil
     
     init(person: Person) {
         self.person = person
@@ -53,6 +57,7 @@ struct PersonView: View {
                     else {
                         ToolbarItem(placement: .topBarLeading, content: {
                             Button {
+                                selectedPhotoData = nil
                                 mode = .view
                             } label: {
                                 Image(systemName: "xmark")
@@ -81,11 +86,39 @@ struct PersonView: View {
                 HStack {
                     Spacer()
                     VStack(spacing: 10) {
-                        Image(systemName: "person.circle")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.blue)
+                        if (mode == .view) {
+                            if let imageData = person.photoData,
+                               let uiImage = UIImage(data: imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 100, height: 100)
+                                    .clipShape(Circle())
+                            } else {
+                                Image(systemName: "person.circle")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                                    .foregroundColor(.blue)
+                            }
+                        } else {
+                            if let imageData = selectedPhotoData,
+                               let uiImage = UIImage(data: imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 100, height: 100)
+                                    .clipShape(Circle())
+                            } else {
+                                PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                                    Image(systemName: "plus")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 100, height: 100)
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
                         Text(person.fullName)
                             .font(.title.bold())
                     }
@@ -146,6 +179,16 @@ struct PersonView: View {
                 
             }
         }
+        .onChange(of: selectedPhotoItem) { oldItem, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    selectedPhotoData = data
+                    selectedPhotoImage = UIImage(data: data)
+                    // clear selection in the PhotosPicker
+                    selectedPhotoItem = nil
+                }
+            }
+        }
     }
     
     func saveInput() {
@@ -153,6 +196,7 @@ struct PersonView: View {
         person.surname = surname
         person.phone = phone
         person.birthDate = birthdate
+        person.photoData = selectedPhotoData
         mode = .view
     }
     

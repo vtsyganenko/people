@@ -6,14 +6,20 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct AddPersonView: View {
     
     @State private var name = ""
     @State private var surname = ""
     @State private var phone = ""
+    
     @State private var birthDate: Date = Date()
     @State private var applyBirthDate = false
+    
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
+    @State private var selectedPhotoData: Data? = nil
+    @State private var selectedPhotoImage: UIImage? = nil
     
     // "interface" - output callback
     var onSuccess: (Person) -> Void
@@ -48,6 +54,32 @@ struct AddPersonView: View {
                             }
                     }
                 }
+                
+                if (selectedPhotoImage == nil) {
+                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                        Text("Photo")
+                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(Color.black)
+                    }
+                } else {
+                    HStack {
+                        Text("Photo")
+                        Spacer()
+                        Image(uiImage: selectedPhotoImage!)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 120, height: 120)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        Spacer()
+                        Image(systemName: "trash")
+                            .font(.title)
+                            .foregroundStyle(Color.black)
+                            .onTapGesture {
+                                selectedPhotoImage = nil
+                                selectedPhotoData = nil
+                            }
+                    }
+                }
             }
             .navigationTitle("New Person")
             .toolbar {
@@ -61,11 +93,22 @@ struct AddPersonView: View {
                     Button("Save") {
                         let newPerson = Person(name: name, surname: surname, phone: phone)
                         if (applyBirthDate) { newPerson.birthDate = birthDate }
+                        newPerson.photoData = selectedPhotoData
                         onSuccess(newPerson)
                         dismiss()
                     }
                     .font(.title2)
                     .disabled(name.isEmpty && surname.isEmpty)
+                }
+            }
+            .onChange(of: selectedPhotoItem) { oldItem, newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                        selectedPhotoData = data
+                        selectedPhotoImage = UIImage(data: data)
+                        // clear selection in the PhotosPicker
+                        selectedPhotoItem = nil
+                    }
                 }
             }
         }

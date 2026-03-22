@@ -76,14 +76,31 @@ struct MainView: View {
         } else {
             List {
                 ForEach(persons) { person in
-                    Text(person.fullName)
-                        // use whole width
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        // make whole area clickable
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedPerson = person
+                    HStack {
+                        Text(person.fullName)
+                            // use whole width
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            // make whole area clickable
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedPerson = person
+                            }
+                        
+                        Spacer()
+                        
+                        if let data = person.photoData,
+                           let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                        } else {
+                            Image(systemName: "person")
+                                .frame(width: 40, height: 40)
+                                .foregroundStyle(Color.gray)
                         }
+                    }
                 }
                 // delete line by swipe left (mark "Delete" is created automatically)
                 .onDelete(perform: deletePerson)
